@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from posts.models import Comment, Group, Post
 from rest_framework import viewsets
 from .permissions import AuthorOrReadOnlyPermissions
@@ -19,11 +18,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено!')
-        super().perform_destroy(instance)
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -36,8 +30,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         post = get_object_or_404(Post, id=self.kwargs.get('post'))
         serializer.save(author=self.request.user, post_id=post.id)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено!')
-        super().perform_destroy(instance)
